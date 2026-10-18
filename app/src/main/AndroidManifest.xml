@@ -1,27 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos necesarios para el DJI SDK V5 (espejados del APK original) -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- ===== Permisos de red ===== -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- ===== Ubicación ===== -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- ===== Bluetooth (API 31+ requiere SCAN y CONNECT) ===== -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="31" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
+        tools:targetApi="31" />
+
+    <!-- ===== Cámara y audio ===== -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- ===== Almacenamiento: legacy (≤ API 32) y media (API 33+) ===== -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <!-- ===== Servicios en primer plano (DJI SDK) ===== -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        tools:targetApi="34" />
+
+    <!-- ===== Otros ===== -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        xmlns:tools="http://schemas.android.com/tools"
         android:name="com.srk.mini3wp.DJIMini3App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -30,10 +55,15 @@
         android:usesCleartextTraffic="false"
         tools:replace="android:usesCleartextTraffic">
 
-        <!-- Clave API DJI — registrar en developer.dji.com -->
+        <!-- API Key DJI SDK V5 -->
         <meta-data
             android:name="com.dji.sdk.API_KEY"
             android:value="${DJI_API_KEY}" />
+
+        <!-- Google Maps API key (opcional si usás mapas offline) -->
+        <!-- <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="TU_CLAVE_GOOGLE_MAPS" /> -->
 
         <activity
             android:name=".ui.MainActivity"
@@ -47,6 +77,7 @@
 
         <activity
             android:name=".ui.FlightPlanActivity"
+            android:exported="false"
             android:screenOrientation="landscape" />
 
     </application>

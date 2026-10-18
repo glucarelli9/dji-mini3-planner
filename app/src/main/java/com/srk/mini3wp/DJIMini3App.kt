@@ -13,7 +13,6 @@ class DJIMini3App : Application() {
         private const val TAG = "DJIMini3App"
         @Volatile var isSDKRegistered = false
 
-        // Listeners for product connect/disconnect — activities subscribe here
         val connectionListeners = mutableListOf<(Boolean) -> Unit>()
 
         fun notifyConnection(connected: Boolean) {
@@ -23,43 +22,48 @@ class DJIMini3App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        SDKManager.getInstance().init(this, object : SDKManagerCallback {
-            override fun onRegisterSuccess() {
-                Log.i(TAG, "SDK registrado exitosamente")
-                isSDKRegistered = true
-                SDKManager.getInstance().registerApp()
-            }
-
-            override fun onRegisterFailure(error: IDJIError) {
-                Log.e(TAG, "Error de registro: ${error.description()}")
-                isSDKRegistered = false
-            }
-
-            override fun onProductConnect(productId: Int) {
-                Log.i(TAG, "Drone conectado (id=$productId)")
-                notifyConnection(true)
-            }
-
-            override fun onProductDisconnect(productId: Int) {
-                Log.i(TAG, "Drone desconectado (id=$productId)")
-                notifyConnection(false)
-            }
-
-            override fun onProductChanged(productId: Int) {
-                Log.i(TAG, "Drone cambiado (id=$productId)")
-                notifyConnection(true)
-            }
-
-            override fun onInitProcess(event: DJISDKInitEvent, totalProcess: Int) {
-                Log.d(TAG, "Init: $event ($totalProcess%)")
-                if (event == DJISDKInitEvent.INITIALIZE_COMPLETE) {
-                    SDKManager.getInstance().registerApp()
+        try {
+            SDKManager.getInstance().init(this, object : SDKManagerCallback {
+                override fun onRegisterSuccess() {
+                    Log.i(TAG, "SDK registrado OK")
+                    isSDKRegistered = true
+                    // onRegisterSuccess se dispara DESPUÉS de registerApp() — no volver a llamarlo
                 }
-            }
 
-            override fun onDatabaseDownloadProgress(current: Long, total: Long) {
-                Log.d(TAG, "DB descarga: $current/$total")
-            }
-        })
+                override fun onRegisterFailure(error: IDJIError) {
+                    Log.e(TAG, "Registro fallido: ${error.description()}")
+                    isSDKRegistered = false
+                }
+
+                override fun onProductConnect(productId: Int) {
+                    Log.i(TAG, "Drone conectado id=$productId")
+                    notifyConnection(true)
+                }
+
+                override fun onProductDisconnect(productId: Int) {
+                    Log.i(TAG, "Drone desconectado id=$productId")
+                    notifyConnection(false)
+                }
+
+                override fun onProductChanged(productId: Int) {
+                    Log.i(TAG, "Drone cambiado id=$productId")
+                    notifyConnection(true)
+                }
+
+                override fun onInitProcess(event: DJISDKInitEvent, totalProcess: Int) {
+                    Log.d(TAG, "Init evento=$event progreso=$totalProcess")
+                    if (event == DJISDKInitEvent.INITIALIZE_COMPLETE) {
+                        // Registrar la app con la API Key (una sola vez)
+                        SDKManager.getInstance().registerApp()
+                    }
+                }
+
+                override fun onDatabaseDownloadProgress(current: Long, total: Long) {
+                    Log.d(TAG, "DB: $current/$total bytes")
+                }
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "SDK init crash: ${e.message}", e)
+        }
     }
 }
