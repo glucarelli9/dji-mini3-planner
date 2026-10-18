@@ -1,13 +1,14 @@
 package com.srk.mini3wp
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
+import androidx.multidex.MultiDexApplication
 import dji.v5.manager.SDKManager
 import dji.v5.manager.interfaces.SDKManagerCallback
 import dji.v5.common.error.IDJIError
 import dji.v5.common.register.DJISDKInitEvent
 
-class DJIMini3App : Application() {
+class DJIMini3App : MultiDexApplication() {
 
     companion object {
         private const val TAG = "DJIMini3App"
@@ -20,6 +21,23 @@ class DJIMini3App : Application() {
         }
     }
 
+    /**
+     * CRÍTICO: El DJI SDK V5 carga sus clases en memoria desde libSdkyclx_clx.so.
+     * Helper.install() debe llamarse en attachBaseContext, ANTES de que el sistema
+     * intente resolver cualquier clase del SDK. Sin esto, SDKManager y todas las
+     * clases del SDK quedan sin resolver (ClassNotFoundException en runtime).
+     */
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        try {
+            com.cySdkyc.clx.Helper.install(this)
+        } catch (e: Throwable) {
+            // En emuladores x86_64 falla (libSdkyclx_clx.so es arm64-only).
+            // En dispositivos arm64 reales debe tener éxito.
+            Log.e(TAG, "Helper.install falló (¿x86_64?): ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         // Instalar crash logger PRIMERO para capturar cualquier fallo
@@ -29,7 +47,6 @@ class DJIMini3App : Application() {
                 override fun onRegisterSuccess() {
                     Log.i(TAG, "SDK registrado OK")
                     isSDKRegistered = true
-                    // onRegisterSuccess se dispara DESPUÉS de registerApp() — no volver a llamarlo
                 }
 
                 override fun onRegisterFailure(error: IDJIError) {
@@ -55,7 +72,6 @@ class DJIMini3App : Application() {
                 override fun onInitProcess(event: DJISDKInitEvent, totalProcess: Int) {
                     Log.d(TAG, "Init evento=$event progreso=$totalProcess")
                     if (event == DJISDKInitEvent.INITIALIZE_COMPLETE) {
-                        // Registrar la app con la API Key (una sola vez)
                         SDKManager.getInstance().registerApp()
                     }
                 }
@@ -64,8 +80,15 @@ class DJIMini3App : Application() {
                     Log.d(TAG, "DB: $current/$total bytes")
                 }
             })
-        } catch (e: Exception) {
-            Log.e(TAG, "SDK init crash: ${e.message}", e)
+        } catch (e: Throwable) {
+            // Captura TANTO Exception como Error (NoClassDefFoundError, UnsatisfiedLinkError, etc.)
+            Log.e(TAG, "SDK init crash: ${e.javaClass.simpleName}: ${e.message}", e)
+            try {
+                val sw = java.io.StringWriter()
+                e.printStackTrace(java.io.PrintWriter(sw))
+                val f = java.io.File(getExternalFilesDir(null) ?: filesDir, "sdk_init_error.txt")
+                f.writeText("SDK_INIT_ERROR: ${e.javaClass.name}\n${sw}")
+            } catch (_: Throwable) {}
         }
     }
 }

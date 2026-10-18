@@ -11,11 +11,14 @@ android {
         applicationId "com.srk.mini3wp"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 3
+        versionName "1.0.3"
 
         // Clave de API del DJI Developer - registrar en https://developer.dji.com
         manifestPlaceholders = [DJI_API_KEY: "aef2956ac610b78f1f4a8eb3"]
+
+        // MultiDex necesario para el DJI SDK V5 (muchas clases)
+        multiDexEnabled true
 
         ndk {
             abiFilters 'arm64-v8a'
@@ -60,6 +63,9 @@ dependencies {
 
     // Implementación de red del SDK V5 (necesario para comunicación con el dron)
     runtimeOnly 'com.dji:dji-sdk-v5-networkImp:5.15.0'
+
+    // MultiDex support
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     // Kotlin + Coroutines
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
