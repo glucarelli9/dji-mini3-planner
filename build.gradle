@@ -1,0 +1,22 @@
+// Root build.gradle
+buildscript {
+    ext.kotlin_version = '1.9.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // DJI SDK V5 repo
+        maven { url 'https://artifact.bytedance.com/repository/pangle' }
+        maven { url 'https://jitpack.io' }
+    }
+}

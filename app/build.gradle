@@ -1,0 +1,77 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.srk.mini3wp'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.srk.mini3wp"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        // Clave de API del DJI Developer - registrar en https://developer.dji.com
+        manifestPlaceholders = [DJI_API_KEY: "aef2956ac610b78f1f4a8eb3"]
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    packagingOptions {
+        doNotStrip "*/arm64-v8a/*.so"
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
+
+    // Las libs nativas del DJI SDK necesitan ser extraídas del APK
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // DJI Mobile SDK V5 - soporte oficial Mini 3 / Mini 3 Pro (v5.15.0 en Maven Central)
+    implementation 'com.dji:dji-sdk-v5-aircraft:5.15.0'
+    compileOnly 'com.dji:dji-sdk-v5-aircraft-provided:5.15.0'
+
+    // Implementación de red del SDK V5 (necesario para comunicación con el dron)
+    runtimeOnly 'com.dji:dji-sdk-v5-networkImp:5.15.0'
+
+    // Kotlin + Coroutines
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+
+    // UI
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // Mapas (para editar la ruta de vuelo)
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.maps.android:maps-ktx:5.0.0'
+}
