@@ -22,6 +22,8 @@ class DJIMini3App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Instalar crash logger PRIMERO para capturar cualquier fallo
+        CrashLogger.install(this)
         try {
             SDKManager.getInstance().init(this, object : SDKManagerCallback {
                 override fun onRegisterSuccess() {
