@@ -69,9 +69,11 @@ object WPMZExporter {
       <wpml:executeRCLostAction>$rcLostStr</wpml:executeRCLostAction>
       <wpml:globalTransitionalSpeed>${config.autoFlightSpeed}</wpml:globalTransitionalSpeed>
       <wpml:droneInfo>
-        <!-- DJI Mini 3 droneEnumValue=89 (RE de libwpmz_jni.so) -->
-        <wpml:droneEnumValue>89</wpml:droneEnumValue>
-        <wpml:droneSubEnumValue>0</wpml:droneSubEnumValue>
+        <!-- DJI Mini 3 / WM265 droneEnumValue=77 (RE de WaylineDroneType en WPMZ SDK)
+             Mini 2 SE no tiene entrada propia en WaylineDroneType - usar WM265 como fallback.
+             NOTA: Mini 2 SE no soporta misiones WPMZ nativamente según DJI MSDK V5. -->
+        <wpml:droneEnumValue>77</wpml:droneEnumValue>
+        <wpml:droneSubEnumValue>2</wpml:droneSubEnumValue>
       </wpml:droneInfo>
     </wpml:missionConfig>
     <Folder>

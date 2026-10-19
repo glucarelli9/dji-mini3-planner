@@ -29,10 +29,10 @@ class MainActivity : AppCompatActivity() {
     private val connectionListener: (Boolean) -> Unit = { connected ->
         runOnUiThread {
             if (connected) {
-                binding.tvDroneStatus.text = "Mini 3 conectado ✓"
+                binding.tvDroneStatus.text = "Drone conectado ✓"
                 binding.btnPlanFlight.isEnabled = true
             } else {
-                binding.tvDroneStatus.text = "Desconectado — encender el Mini 3"
+                binding.tvDroneStatus.text = "Drone desconectado — encender el drone"
                 binding.btnPlanFlight.isEnabled = false
             }
         }
@@ -51,10 +51,27 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         DJIMini3App.connectionListeners.add(connectionListener)
-        binding.tvSdkStatus.text =
-            if (DJIMini3App.isSDKRegistered) "SDK V5 ✓ registrado" else "SDK registrando..."
-        // Estado inicial — sin query al SDK (API no lo expone en V5.15 sin KeyManager completo)
-        binding.tvDroneStatus.text = "Buscando Mini 3..."
+
+        // Mostrar error de SDK si existe (ayuda a diagnosticar crash en S25/Android 15)
+        val err = DJIMini3App.sdkInitError
+        binding.tvSdkStatus.text = when {
+            err != null -> "⚠ SDK error: $err"
+            DJIMini3App.isSDKRegistered -> "SDK V5 ✓ registrado"
+            else -> "SDK registrando..."
+        }
+
+        // Mostrar log de diagnóstico en consola si existe (startup_log.txt)
+        try {
+            val logFile = java.io.File(
+                getExternalFilesDir(null) ?: filesDir,
+                "startup_log.txt"
+            )
+            if (logFile.exists()) {
+                android.util.Log.d("DJIMini", "=== STARTUP LOG ===\n${logFile.readText()}")
+            }
+        } catch (_: Throwable) {}
+
+        binding.tvDroneStatus.text = "Buscando drone..."
         binding.btnPlanFlight.isEnabled = false
     }
 

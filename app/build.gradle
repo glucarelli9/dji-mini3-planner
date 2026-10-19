@@ -11,8 +11,8 @@ android {
         applicationId "com.srk.mini3wp"
         minSdk 24
         targetSdk 34
-        versionCode 3
-        versionName "1.0.3"
+        versionCode 4
+        versionName "1.0.4"
 
         // Clave de API del DJI Developer - registrar en https://developer.dji.com
         manifestPlaceholders = [DJI_API_KEY: "aef2956ac610b78f1f4a8eb3"]

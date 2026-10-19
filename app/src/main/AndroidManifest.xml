@@ -40,6 +40,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
         tools:targetApi="34" />
+    <!-- dataSync: para transferencia de misiones/archivos al drone -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+        tools:targetApi="34" />
 
     <!-- ===== Otros ===== -->
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -50,7 +53,7 @@
         android:name="com.srk.mini3wp.DJIMini3App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="Mini3 Planner"
+        android:label="DJI Mini Planner"
         android:theme="@style/Theme.Mini3Planner"
         android:usesCleartextTraffic="true"
         android:largeHeap="true"
@@ -61,11 +64,6 @@
             android:name="com.dji.sdk.API_KEY"
             android:value="${DJI_API_KEY}" />
 
-        <!-- Google Maps API key (opcional si usás mapas offline) -->
-        <!-- <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="TU_CLAVE_GOOGLE_MAPS" /> -->
-
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -74,12 +72,43 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- DJI RC/drone connection via USB accessory (RC-N1, RC2, etc.) -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/dji_accessory_filter" />
+            <!-- DJI drone as USB device (some older models) -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/dji_device_filter" />
         </activity>
 
         <activity
             android:name=".ui.FlightPlanActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
+
+        <!--
+          DJI SDK V5 internal services — declarados explícitamente con foregroundServiceType
+          para cumplir con Android 14+ (API 34) que requiere el tipo declarado en el manifest.
+          Las clases se cargan dinámicamente vía Helper.install() desde libSdkyclx_clx.so.
+        -->
+        <service
+            android:name="dji.v5.manager.internal.ThermalService"
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+
+        <service
+            android:name="dji.v5.manager.internal.UpgradeService"
+            android:foregroundServiceType="connectedDevice|dataSync"
+            android:exported="false"
+            tools:ignore="MissingClass" />
 
     </application>
 

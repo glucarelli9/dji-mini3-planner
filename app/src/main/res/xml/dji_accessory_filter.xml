@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filtro de USB accessory para controladores DJI (RC-N1, RC2, RC Pro, etc.) -->
+<resources>
+    <usb-accessory manufacturer="DJI" model="RemoteController" />
+</resources>
